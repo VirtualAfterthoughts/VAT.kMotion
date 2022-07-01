@@ -44,27 +44,39 @@ namespace kTools.Motion
             var camera = renderingData.cameraData.camera;
 
             // Never draw in Preview
-            if(camera.cameraType == CameraType.Preview)
+            if (camera.cameraType == CameraType.Preview)
                 return;
 
             // Profiling command
             CommandBuffer cmd = CommandBufferPool.Get(kProfilingTag);
-            using (new ProfilingSample(cmd, kProfilingTag))
+            using (new ProfilingScope(cmd, new ProfilingSampler(kProfilingTag)))
             {
                 // Set Material properties from VolumeComponent
                 m_Material.SetFloat("_Intensity", m_MotionBlur.intensity.value);
 
-                // TODO: Why doesnt RenderTargetHandle.CameraTarget work?
-                var colorTextureIdentifier = new RenderTargetIdentifier("_CameraColorTexture");
-
                 // RenderTexture
-                var descriptor = new RenderTextureDescriptor(camera.scaledPixelWidth, camera.scaledPixelHeight, RenderTextureFormat.DefaultHDR, 16);
+                var descriptor = renderingData.cameraData.cameraTargetDescriptor;
+                descriptor.colorFormat = RenderTextureFormat.DefaultHDR;
+                descriptor.depthBufferBits = 16;
+
                 var renderTexture = RenderTexture.GetTemporary(descriptor);
 
                 // Blits
                 var passIndex = (int)m_MotionBlur.quality.value;
-                cmd.Blit(colorTextureIdentifier, renderTexture, m_Material, passIndex);
-                cmd.Blit(renderTexture, colorTextureIdentifier, m_Material, passIndex);
+
+                cmd.SetGlobalTexture("_MainTex", renderingData.cameraData.renderer.cameraColorTarget);
+                cmd.SetGlobalVector("_MainTex_TexelSize", new Vector4(0, 0, renderTexture.width, renderTexture.height));
+                cmd.SetRenderTarget(new RenderTargetIdentifier(renderTexture, 0, CubemapFace.Unknown, -1));
+                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Material, 0, passIndex);
+
+                cmd.SetGlobalTexture("_MainTex", renderTexture);
+                cmd.SetGlobalVector("_MainTex_TexelSize", new Vector4(0, 0, renderTexture.width, renderTexture.height));
+                cmd.SetRenderTarget(new RenderTargetIdentifier(renderingData.cameraData.renderer.cameraColorTarget, 0, CubemapFace.Unknown, -1));
+                cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Material, 0, passIndex);
+
+                //cmd.Blit(renderingData.cameraData.renderer.cameraColorTarget, renderTexture, m_Material, passIndex);
+                //cmd.Blit(renderTexture, renderingData.cameraData.renderer.cameraColorTarget, m_Material, passIndex);
+
                 ExecuteCommand(context, cmd);
 
                 RenderTexture.ReleaseTemporary(renderTexture);
