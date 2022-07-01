@@ -10,7 +10,7 @@ namespace kTools.Motion
 #region Fields
         const string kCameraShader = "Hidden/kMotion/CameraMotionVectors";
         const string kObjectShader = "Hidden/kMotion/ObjectMotionVectors";
-        const string kPreviousViewProjectionMatrix = "_PrevViewProjMatrix";
+        const string kPreviousViewProjectionMatrix = "_PreviousViewProjMatrix";
         const string kMotionVectorTexture = "_MotionVectorTexture";
         const string kProfilingTag = "Motion Vectors";
 
@@ -68,12 +68,12 @@ namespace kTools.Motion
 
             // Profiling command
             CommandBuffer cmd = CommandBufferPool.Get(kProfilingTag);
-            using (new ProfilingSample(cmd, kProfilingTag))
+            using (new ProfilingScope(cmd, new ProfilingSampler(kProfilingTag)))
             {
                 ExecuteCommand(context, cmd);
 
                 // Shader uniforms
-                Shader.SetGlobalMatrix(kPreviousViewProjectionMatrix, m_MotionData.previousViewProjectionMatrix);
+                Shader.SetGlobalMatrixArray(kPreviousViewProjectionMatrix, m_MotionData.previousViewProjectionMatrix);
 
                 // These flags are still required in SRP or the engine won't compute previous model matrices...
                 // If the flag hasn't been set yet on this camera, motion vectors will skip a frame.
@@ -113,7 +113,7 @@ namespace kTools.Motion
         void DrawCameraMotionVectors(ScriptableRenderContext context, CommandBuffer cmd, Camera camera)
         {
             // Draw fullscreen quad
-            cmd.DrawProcedural(Matrix4x4.identity, m_CameraMaterial, 0, MeshTopology.Triangles, 3, 1);
+            cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_CameraMaterial, 0, 0);
             ExecuteCommand(context, cmd);
         }
 

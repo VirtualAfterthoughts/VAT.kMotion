@@ -50,7 +50,7 @@ namespace kTools.Motion
 
             // Calculate motion data
             CalculateTime();
-            UpdateMotionData(camera, motionData);
+            UpdateMotionData(camera, motionData, renderingData.cameraData.xrRendering);
 
             // Motion vector pass
             m_MotionVectorRenderPass.Setup(motionData);
@@ -99,25 +99,66 @@ namespace kTools.Motion
             }
         }
 
-        void UpdateMotionData(Camera camera, MotionData motionData)
+        void UpdateMotionData(Camera camera, MotionData motionData, bool isXr = false)
         {
             // The actual projection matrix used in shaders is actually massaged a bit to work across all platforms
             // (different Z value ranges etc.)
-            var gpuProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, true); // Had to change this from 'false'
-            var gpuView = camera.worldToCameraMatrix;
-            var gpuVP = gpuProj * gpuView;
-
-            // Set last frame data
-            // A camera could be rendered multiple times per frame, only updates the previous view proj & pos if needed
-            if (motionData.lastFrameActive != Time.frameCount)
+            if (!isXr)
             {
-                motionData.isFirstFrame = false;
-                motionData.previousViewProjectionMatrix = motionData.isFirstFrame ? 
-                        gpuVP : motionData.viewProjectionMatrix;
+                var gpuProj = GL.GetGPUProjectionMatrix(camera.projectionMatrix, true); // Had to change this from 'false'
+                var gpuView = camera.worldToCameraMatrix;
+                var gpuVP = gpuProj * gpuView;
+
+                // Set last frame data
+                // A camera could be rendered multiple times per frame, only updates the previous view proj & pos if needed
+                if (motionData.lastFrameActive != Time.frameCount)
+                {
+                    motionData.isFirstFrame = false;
+                    motionData.previousViewProjectionMatrix[0] = motionData.isFirstFrame ?
+                            gpuVP : motionData.viewProjectionMatrix[0];
+                }
+
+                // Set current frame data
+                motionData.viewProjectionMatrix[0] = gpuVP;
+            }
+            else
+            {
+                var gpuProj = GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left), true); // Had to change this from 'false'
+                var gpuView = camera.GetStereoViewMatrix(Camera.StereoscopicEye.Left);
+                var gpuVP = gpuProj * gpuView;
+
+                // Set last frame data
+                // A camera could be rendered multiple times per frame, only updates the previous view proj & pos if needed
+                bool isFirstFrame = motionData.isFirstFrame ;
+                if (motionData.lastFrameActive != Time.frameCount)
+                {
+                    isFirstFrame = false;
+                    motionData.previousViewProjectionMatrix[0] = isFirstFrame ?
+                            gpuVP : motionData.viewProjectionMatrix[0];
+                }
+
+                motionData.viewProjectionMatrix[0] = gpuVP;
+
+                // Other eye
+                gpuProj = GL.GetGPUProjectionMatrix(camera.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right), true); // Had to change this from 'false'
+                gpuView = camera.GetStereoViewMatrix(Camera.StereoscopicEye.Right);
+                gpuVP = gpuProj * gpuView;
+
+                // Set last frame data
+                // A camera could be rendered multiple times per frame, only updates the previous view proj & pos if needed
+                if (motionData.lastFrameActive != Time.frameCount)
+                {
+                    isFirstFrame = false;
+                    motionData.previousViewProjectionMatrix[1] = isFirstFrame ?
+                            gpuVP : motionData.viewProjectionMatrix[1];
+                }
+
+                // Set current frame data
+                motionData.viewProjectionMatrix[1] = gpuVP;
+
+                motionData.isFirstFrame = isFirstFrame;
             }
 
-            // Set current frame data
-            motionData.viewProjectionMatrix = gpuVP;
             motionData.lastFrameActive = Time.frameCount;
         }
     }

@@ -26,14 +26,15 @@
 
             // -------------------------------------
             // Inputs
-            
+            float4x4 _PreviousViewProjMatrix[2];
+
             CBUFFER_START(UnityPerMaterial)
-            float4x4 unity_MatrixPreviousM;
+            //float4x4 unity_MatrixPreviousM;
 
             //X : Use last frame positions (right now skinned meshes are the only objects that use this
             //Y : Force No Motion
             //Z : Z bias value
-            float4 unity_MotionVectorsParams;
+            //float4 unity_MotionVectorsParams;
             CBUFFER_END
 
             // -------------------------------------
@@ -50,7 +51,8 @@
                 float4 positionCS           : SV_POSITION;
                 float4 positionVP           : TEXCOORD0;
                 float4 previousPositionVP   : TEXCOORD1;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
+
+                UNITY_VERTEX_INPUT_INSTANCE_ID 
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -61,7 +63,6 @@
                 Varyings output = (Varyings)0;
 
                 UNITY_SETUP_INSTANCE_ID(input);
-                UNITY_TRANSFER_INSTANCE_ID(input, output);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(output);
 
                 output.positionCS = TransformObjectToHClip(input.position.xyz);
@@ -75,15 +76,14 @@
                 #endif
                 
                 output.positionVP = mul(UNITY_MATRIX_VP, mul(UNITY_MATRIX_M, input.position));
-                output.previousPositionVP = mul(_PrevViewProjMatrix, mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
+                output.previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
                 return output;
             }
 
             // -------------------------------------
             // Fragment
             half4 frag(Varyings input) : SV_Target
-            {
-                UNITY_SETUP_INSTANCE_ID(input);
+            {   
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
                 // Note: unity_MotionVectorsParams.y is 0 is forceNoMotion is enabled
