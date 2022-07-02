@@ -77,11 +77,9 @@
                 
                 output.positionVP = mul(UNITY_MATRIX_VP, mul(UNITY_MATRIX_M, input.position));
 
-                #ifndef UNITY_STEREO_PASS_INSTANCED
-                unity_StereoEyeIndex = 0;
-                #endif
-
-                output.previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
+                // TODO: Fix this
+                //output.previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
+                output.previousPositionVP = mul(_PreviousViewProjMatrix[0], mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
                 return output;
             }
 

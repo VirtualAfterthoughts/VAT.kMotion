@@ -83,7 +83,10 @@
                 PositionInputs positionInputs = GetPositionInput(input.position.xy, screenSize, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V);
 
                 // Calculate positions
-                float4 previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], float4(positionInputs.positionWS, 1.0));
+
+                // TODO: Fix this
+                //float4 previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], float4(positionInputs.positionWS, 1.0));
+                float4 previousPositionVP = mul(_PreviousViewProjMatrix[0], float4(positionInputs.positionWS, 1.0));
                 float4 positionVP = mul(UNITY_MATRIX_VP, float4(positionInputs.positionWS, 1.0));
                 previousPositionVP.xy = previousPositionVP.xy / previousPositionVP.w;
                 positionVP.xy = positionVP.xy / positionVP.w;
