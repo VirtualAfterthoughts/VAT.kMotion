@@ -76,6 +76,11 @@
                 #endif
                 
                 output.positionVP = mul(UNITY_MATRIX_VP, mul(UNITY_MATRIX_M, input.position));
+
+                #ifndef UNITY_STEREO_PASS_INSTANCED
+                unity_StereoEyeIndex = 0;
+                #endif
+
                 output.previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
                 return output;
             }
@@ -106,7 +111,7 @@
                 // Convert from Clip space (-1..1) to NDC 0..1 space.
                 // Note it doesn't mean we don't have negative value, we store negative or positive offset in NDC space.
                 // Note: ((positionCS * 0.5 + 0.5) - (previousPositionCS * 0.5 + 0.5)) = (velocity * 0.5)
-                return float4(velocity.xy * 0.5, 0, 0);
+                return half4(velocity.xy * 0.5, 0, 0);
             }
             ENDHLSL
         }
