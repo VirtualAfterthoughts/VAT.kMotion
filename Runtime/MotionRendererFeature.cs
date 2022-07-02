@@ -41,6 +41,11 @@ namespace kTools.Motion
         {
             // Get MotionData
             var camera = renderingData.cameraData.camera;
+
+            // TODO: Find a use for MotionVectors in VR
+            if (renderingData.cameraData.xrRendering)
+                return;
+
             MotionData motionData;
             if(!m_MotionDatas.TryGetValue(camera, out motionData))
             {
@@ -50,7 +55,7 @@ namespace kTools.Motion
 
             // Calculate motion data
             CalculateTime();
-            UpdateMotionData(camera, motionData, renderingData.cameraData.xrRendering);
+            UpdateMotionData(camera, motionData);
 
             // Motion vector pass
             m_MotionVectorRenderPass.Setup(motionData);
