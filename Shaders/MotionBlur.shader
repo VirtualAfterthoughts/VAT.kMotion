@@ -46,11 +46,7 @@
         output.positionCS.y *= -1;
         #endif
 
-        float4 projPos = output.positionCS * 0.5;
-        projPos.xy = projPos.xy + projPos.w;
-
         output.uv.xy = input.uv;
-        output.uv.zw = projPos.xy;
 
         return output;
     }
@@ -69,7 +65,9 @@
         UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
         float2 uv = UnityStereoTransformScreenSpaceTex(input.uv.xy);
+        
         float2 velocity = SAMPLE_TEXTURE2D_X(_MotionVectorTexture, sampler_MotionVectorTexture, uv).rg * _Intensity;
+
         float randomVal = InterleavedGradientNoise(uv * _MainTex_TexelSize.zw, 0);
         float invSampleCount = rcp(iterations * 2.0);
 
@@ -82,8 +80,9 @@
             color += GatherSample(i, velocity, invSampleCount, uv, randomVal,  1.0);
         }
 
-        //color = SAMPLE_TEXTURE2D_X(_MotionVectorTexture, sampler_MotionVectorTexture, uv).rgb * _Intensity;
-        //color = SAMPLE_TEXTURE2D_X(_MainTex, sampler_PointClamp, uv) / invSampleCount;
+        //return abs(SAMPLE_TEXTURE2D_X(_MotionVectorTexture, sampler_MotionVectorTexture, uv));
+        //return float4(abs(velocity), 0, 1);
+
         return half4(color * invSampleCount, 1.0);
     }
 

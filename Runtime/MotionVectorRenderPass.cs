@@ -47,7 +47,12 @@ namespace kTools.Motion
         {
             // Configure Render Target
             m_MotionVectorHandle.Init(kMotionVectorTexture);
-            cmd.GetTemporaryRT(m_MotionVectorHandle.id, cameraTextureDescriptor, FilterMode.Point);
+
+            // We need to slightly tweak the container for the data we're holding
+            var descriptor = cameraTextureDescriptor;
+            descriptor.colorFormat = RenderTextureFormat.RGHalf;
+
+            cmd.GetTemporaryRT(m_MotionVectorHandle.id, descriptor, FilterMode.Point);
             ConfigureTarget(m_MotionVectorHandle.Identifier(), m_MotionVectorHandle.Identifier());
             cmd.SetRenderTarget(m_MotionVectorHandle.Identifier(), m_MotionVectorHandle.Identifier());
                 
