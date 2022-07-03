@@ -24,7 +24,7 @@ namespace kTools.Motion
         internal MotionBlurRenderPass()
         {
             // Set data
-            renderPassEvent = RenderPassEvent.AfterRenderingPostProcessing;
+            renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
         }
 #endregion
 
@@ -75,7 +75,7 @@ namespace kTools.Motion
                 cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Material, 0, passIndex);
 
                 //cmd.Blit(renderingData.cameraData.renderer.cameraColorTarget, renderTexture, m_Material, passIndex);
-                //cmd.Blit(renderTexture, renderingData.cameraData.renderer.cameraColorTarget, m_Material, passIndex);
+                //cmd.Blit(renderTexture, renderingData.cameraData.renderer.cameraColorTarget);
 
                 ExecuteCommand(context, cmd);
 

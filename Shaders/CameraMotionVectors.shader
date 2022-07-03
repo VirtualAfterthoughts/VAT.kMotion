@@ -9,10 +9,7 @@
             ZTest Always
 
             HLSLPROGRAM
-            // Required to compile gles 2.0 with standard srp library
-            #pragma prefer_hlslcc gles
-            #pragma exclude_renderers d3d11_9x
-			#pragma target 2.0
+			#pragma target 5.0
 
             #pragma multi_compile_instancing
 
@@ -26,7 +23,6 @@
             // -------------------------------------
             // Inputs
             TEXTURE2D_X(_CameraDepthTexture);       SAMPLER(sampler_CameraDepthTexture);
-            float4x4 _PreviousViewProjMatrix[2];
 
             // -------------------------------------
             // Structs
@@ -73,20 +69,13 @@
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
-                #ifndef UNITY_STEREO_PASS_INSTANCED
-                unity_StereoEyeIndex = 0;
-                #endif
-
                 // Calculate PositionInputs
                 half depth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_CameraDepthTexture, input.uv.xy).x;
                 half2 screenSize = half2(1 / _ScreenParams.x, 1 / _ScreenParams.y);
                 PositionInputs positionInputs = GetPositionInput(input.position.xy, screenSize, depth, UNITY_MATRIX_I_VP, UNITY_MATRIX_V);
 
                 // Calculate positions
-
-                // TODO: Fix this
-                //float4 previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], float4(positionInputs.positionWS, 1.0));
-                float4 previousPositionVP = mul(_PreviousViewProjMatrix[0], float4(positionInputs.positionWS, 1.0));
+                float4 previousPositionVP = mul(_PrevViewProjMatrix, float4(positionInputs.positionWS, 1.0));
                 float4 positionVP = mul(UNITY_MATRIX_VP, float4(positionInputs.positionWS, 1.0));
                 previousPositionVP.xy = previousPositionVP.xy / previousPositionVP.w;
                 positionVP.xy = positionVP.xy / positionVP.w;

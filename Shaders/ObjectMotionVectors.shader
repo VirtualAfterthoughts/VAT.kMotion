@@ -8,10 +8,7 @@
             Tags{ "LightMode" = "MotionVectors" }
 
             HLSLPROGRAM
-            // Required to compile gles 2.0 with standard srp library
-            #pragma prefer_hlslcc gles
-            #pragma exclude_renderers d3d11_9x
-			#pragma target 3.0
+			#pragma target 5.0
 
             //--------------------------------------
             // GPU Instancing
@@ -26,16 +23,7 @@
 
             // -------------------------------------
             // Inputs
-            float4x4 _PreviousViewProjMatrix[2];
 
-            CBUFFER_START(UnityPerMaterial)
-            //float4x4 unity_MatrixPreviousM;
-
-            //X : Use last frame positions (right now skinned meshes are the only objects that use this
-            //Y : Force No Motion
-            //Z : Z bias value
-            //float4 unity_MotionVectorsParams;
-            CBUFFER_END
 
             // -------------------------------------
             // Structs
@@ -76,10 +64,7 @@
                 #endif
                 
                 output.positionVP = mul(UNITY_MATRIX_VP, mul(UNITY_MATRIX_M, input.position));
-
-                // TODO: Fix this
-                //output.previousPositionVP = mul(_PreviousViewProjMatrix[unity_StereoEyeIndex], mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
-                output.previousPositionVP = mul(_PreviousViewProjMatrix[0], mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
+                output.previousPositionVP = mul(_PrevViewProjMatrix, mul(unity_MatrixPreviousM, unity_MotionVectorsParams.x == 1 ? float4(input.positionOld, 1) : input.position));
                 return output;
             }
 

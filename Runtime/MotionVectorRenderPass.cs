@@ -10,14 +10,13 @@ namespace kTools.Motion
 #region Fields
         const string kCameraShader = "Hidden/kMotion/CameraMotionVectors";
         const string kObjectShader = "Hidden/kMotion/ObjectMotionVectors";
-        const string kPreviousViewProjectionMatrix = "_PreviousViewProjMatrix";
+        const string kPreviousViewProjectionMatrix = "_PrevViewProjMatrix";
         const string kMotionVectorTexture = "_MotionVectorTexture";
         const string kProfilingTag = "Motion Vectors";
 
         static readonly string[] s_ShaderTags = new string[]
         {
-            "UniversalForward",
-            "LightweightForward",
+            "MotionVectors"
         };
 
         RenderTargetHandle m_MotionVectorHandle;
@@ -78,7 +77,7 @@ namespace kTools.Motion
                 ExecuteCommand(context, cmd);
 
                 // Shader uniforms
-                Shader.SetGlobalMatrixArray(kPreviousViewProjectionMatrix, m_MotionData.previousViewProjectionMatrix);
+                Shader.SetGlobalMatrix(kPreviousViewProjectionMatrix, m_MotionData.previousViewProjectionMatrix);
 
                 // These flags are still required in SRP or the engine won't compute previous model matrices...
                 // If the flag hasn't been set yet on this camera, motion vectors will skip a frame.
@@ -110,8 +109,8 @@ namespace kTools.Motion
             }
             
             // Material
-            drawingSettings.overrideMaterial = m_ObjectMaterial;
-            drawingSettings.overrideMaterialPassIndex = 0;
+            //drawingSettings.overrideMaterial = m_ObjectMaterial;
+            //drawingSettings.overrideMaterialPassIndex = 0;
             return drawingSettings;
         }
 
