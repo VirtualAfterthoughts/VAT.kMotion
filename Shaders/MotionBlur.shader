@@ -53,11 +53,11 @@
 
     // -------------------------------------
     // Fragment
-    float3 GatherSample(float sampleNumber, float2 velocity, float invSampleCount, float2 centerUV, float randomVal, float velocitySign)
+    half4 GatherSample(float sampleNumber, float2 velocity, float invSampleCount, float2 centerUV, float randomVal, float velocitySign)
     {
         float  offsetLength = (sampleNumber + 0.5) + (velocitySign * (randomVal - 0.5));
         float2 sampleUV = centerUV + (offsetLength * invSampleCount) * velocity * velocitySign;
-        return SAMPLE_TEXTURE2D_X(_MainTex, sampler_PointClamp, sampleUV).xyz;
+        return SAMPLE_TEXTURE2D_X(_MainTex, sampler_PointClamp, sampleUV);
     }
 
     half4 DoMotionBlur(VaryingsMB input, int iterations)
@@ -69,21 +69,21 @@
         float2 velocity = SAMPLE_TEXTURE2D_X(_MotionVectorTexture, sampler_MotionVectorTexture, uv).rg * _Intensity;
 
         float randomVal = InterleavedGradientNoise(uv * _MainTex_TexelSize.zw, 0);
-        float invSampleCount = rcp(iterations * 2.0);
+        float invSampleCount = rcp(iterations * 2);
 
-        half3 color = 0.0;
+        half4 color = 0.0;
 
         UNITY_UNROLL
         for (int i = 0; i < iterations; i++)
         {
             color += GatherSample(i, velocity, invSampleCount, uv, randomVal, -1.0);
-            color += GatherSample(i, velocity, invSampleCount, uv, randomVal,  1.0);
+            color += GatherSample(i, velocity, invSampleCount, uv, randomVal, 1.0);
         }
 
         //return abs(SAMPLE_TEXTURE2D_X(_MotionVectorTexture, sampler_MotionVectorTexture, uv));
         //return float4(abs(velocity), 0, 1);
 
-        return half4(color * invSampleCount, 1.0);
+        return color * invSampleCount;
     }
 
     ENDHLSL
@@ -142,7 +142,7 @@
             half4 Frag(VaryingsMB input) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-                return DoMotionBlur(input, 4);
+                return DoMotionBlur(input, 5);
             }
 
             ENDHLSL
