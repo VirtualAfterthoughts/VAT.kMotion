@@ -14,6 +14,9 @@ namespace kTools.Motion
         const string kMotionVectorTexture = "_MotionVectorTexture";
         const string kProfilingTag = "Motion Vectors";
 
+        const string kPerObjectMotionIntensity = "_kMotionPerObjectFac";
+        const string kCameraMotionIntensity = "_kMotionCameraFac";
+
         static readonly string[] s_ShaderTags = new string[]
         {
             "MotionVectors"
@@ -23,6 +26,8 @@ namespace kTools.Motion
         Material m_CameraMaterial;
         Material m_ObjectMaterial;
         MotionData m_MotionData;
+
+        MotionBlur m_MotionBlur;
 #endregion
 
 #region Constructors
@@ -34,9 +39,10 @@ namespace kTools.Motion
 #endregion
 
 #region State
-        internal void Setup(MotionData motionData)
+        internal void Setup(MotionData motionData, MotionBlur motionBlur)
         {
             // Set data
+            m_MotionBlur = motionBlur;
             m_MotionData = motionData;
             m_CameraMaterial = new Material(Shader.Find(kCameraShader));
             m_ObjectMaterial = new Material(Shader.Find(kObjectShader));
@@ -66,8 +72,8 @@ namespace kTools.Motion
             // Get data
             var camera = renderingData.cameraData.camera;
 
-            // Never draw in Preview
-            if(camera.cameraType == CameraType.Preview)
+            // Never draw in previews or reflections
+            if (camera.cameraType == CameraType.Preview || camera.cameraType == CameraType.Reflection)
                 return;
 
             // Profiling command
@@ -78,6 +84,8 @@ namespace kTools.Motion
 
                 // Shader uniforms
                 Shader.SetGlobalMatrix(kPreviousViewProjectionMatrix, m_MotionData.previousViewProjectionMatrix);
+                Shader.SetGlobalFloat(kPerObjectMotionIntensity, m_MotionBlur.perObjectBlurIntensity.value);
+                Shader.SetGlobalFloat(kCameraMotionIntensity, m_MotionBlur.cameraBlurIntensity.value);
 
                 // These flags are still required in SRP or the engine won't compute previous model matrices...
                 // If the flag hasn't been set yet on this camera, motion vectors will skip a frame.
@@ -109,7 +117,7 @@ namespace kTools.Motion
             }
             
             // Material
-            //drawingSettings.overrideMaterial = m_ObjectMaterial;
+            //drawingSettings.fallbackMaterial = m_ObjectMaterial;
             //drawingSettings.overrideMaterialPassIndex = 0;
             return drawingSettings;
         }

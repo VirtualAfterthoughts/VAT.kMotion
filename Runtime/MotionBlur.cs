@@ -14,12 +14,18 @@ namespace kTools.Motion
         [Tooltip("The quality of the effect. Lower presets will result in better performance at the expense of visual quality.")]
         public MotionBlurQualityParameter quality = new MotionBlurQualityParameter(MotionBlurQuality.Low);
         
+        [Tooltip("The strength of object motion.")]
+        public ClampedFloatParameter perObjectBlurIntensity = new ClampedFloatParameter(1f, 0f, 1f);
+
+        [Tooltip("The strength of camera motion")]
+        public ClampedFloatParameter cameraBlurIntensity = new ClampedFloatParameter(1f, 0f, 1f);
+
         /// <summary>
-        /// The strength of the motion blur filter. Acts as a multiplier for velocities.
+        /// The cumulative strength of the motion blur filter. Acts as a multiplier for velocities.
         /// </summary>
-        [Tooltip("The strength of the motion blur filter. Acts as a multiplier for velocities.")]
+        [Tooltip("The cumulative strength of the motion blur filter. Acts as a multiplier for velocities.")]
         public ClampedFloatParameter intensity = new ClampedFloatParameter(0f, 0f, 1f);
-        
+
         /// <summary>
         /// Is the component active?
         /// </summary>
