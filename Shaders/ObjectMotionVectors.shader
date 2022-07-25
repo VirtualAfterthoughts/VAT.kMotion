@@ -68,6 +68,8 @@
                 return output;
             }
 
+            float _kMotionPerObjectFac;
+
             // -------------------------------------
             // Fragment
             half4 frag(Varyings input) : SV_Target
