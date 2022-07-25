@@ -43,8 +43,8 @@ namespace kTools.Motion
             // Get data
             var camera = renderingData.cameraData.camera;
 
-            // Never draw in Preview
-            if (camera.cameraType == CameraType.Preview)
+            // Never draw in previews or reflections
+            if (camera.cameraType == CameraType.Preview || camera.cameraType == CameraType.Reflection)
                 return;
 
             // Profiling command

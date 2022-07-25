@@ -52,13 +52,14 @@ namespace kTools.Motion
             CalculateTime();
             UpdateMotionData(camera, motionData);
 
+            var stack = VolumeManager.instance.stack;
+            var motionBlur = stack.GetComponent<MotionBlur>();
+
             // Motion vector pass
-            m_MotionVectorRenderPass.Setup(motionData);
+            m_MotionVectorRenderPass.Setup(motionData, motionBlur);
             renderer.EnqueuePass(m_MotionVectorRenderPass);
 
             // Motion blur pass
-            var stack = VolumeManager.instance.stack;
-            var motionBlur = stack.GetComponent<MotionBlur>();
             if (motionBlur.IsActive() && !renderingData.cameraData.isSceneViewCamera)
             {
                 m_MotionBlurRenderPass.Setup(motionBlur);
