@@ -68,7 +68,9 @@
         
         float2 velocity = SAMPLE_TEXTURE2D_X(_MotionVectorTexture, sampler_MotionVectorTexture, uv).rg * _Intensity;
 
-        float randomVal = InterleavedGradientNoise(uv * _MainTex_TexelSize.zw, 0);
+        // zCubed: Multiply by 1000 because this noise algorithm causes banding otherwise :/
+        // zCubed: Quite annoying that this noise pattern causes such harsh banding...
+        float randomVal = InterleavedGradientNoise(uv * 1000.0 * _MainTex_TexelSize.zw, 0);
         float invSampleCount = rcp(iterations * 2);
 
         half4 color = 0.0;
@@ -82,6 +84,7 @@
 
         //return abs(SAMPLE_TEXTURE2D_X(_MotionVectorTexture, sampler_MotionVectorTexture, uv));
         //return float4(abs(velocity), 0, 1);
+        //return fac;
 
         return color * invSampleCount;
     }
@@ -142,7 +145,7 @@
             half4 Frag(VaryingsMB input) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-                return DoMotionBlur(input, 5);
+                return DoMotionBlur(input, 4);
             }
 
             ENDHLSL
