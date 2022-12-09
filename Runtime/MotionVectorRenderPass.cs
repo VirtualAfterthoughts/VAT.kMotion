@@ -17,9 +17,11 @@ namespace kTools.Motion
         const string kPerObjectMotionIntensity = "_kMotionPerObjectFac";
         const string kCameraMotionIntensity = "_kMotionCameraFac";
 
+        // We only render materials that export a motion vector pass
+        // Specifically kMotionVectors
         static readonly string[] s_ShaderTags = new string[]
         {
-            "MotionVectors"
+            "kMotionVectors"
         };
 
         RenderTargetHandle m_MotionVectorHandle;
@@ -61,7 +63,7 @@ namespace kTools.Motion
             ConfigureTarget(m_MotionVectorHandle.Identifier(), m_MotionVectorHandle.Identifier());
             cmd.SetRenderTarget(m_MotionVectorHandle.Identifier(), m_MotionVectorHandle.Identifier());
                 
-            // TODO: Why do I have to clear here?
+            // zCubed: You have to clear here because of the temporary RT :)
             cmd.ClearRenderTarget(true, true, Color.black, 1.0f);
         }
 #endregion
