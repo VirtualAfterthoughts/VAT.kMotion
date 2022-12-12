@@ -18,9 +18,9 @@ namespace kTools.Motion
         const string kCameraMotionIntensity = "_kMotionCameraFac";
 
         // We only render materials that export a motion vector pass
-        // Specifically kMotionVectors
         static readonly string[] s_ShaderTags = new string[]
         {
+            "MotionVectors",
             "kMotionVectors"
         };
 
